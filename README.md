@@ -1,8 +1,6 @@
 # Graft
 
-Graft is a consensus system written in Rust. It is not a new consensus algorithm. Instead, it is a composed protocol profile built around Raft's proven core.
-
-Consensus algorithms are easy to get wrong under rare edge cases. To avoid introducing subtle safety bugs, Graft leaves Raft's core safety invariants (terms, log matching, and election restrictions) unchanged. The novelty and optimizations are placed in modular layers built around that core.
+Graft is a consensus system written in Rust. It is not a new consensus algorithm. Instead, it is a composed protocol profile built around Raft's  core.
 
 ## What It Is
 
