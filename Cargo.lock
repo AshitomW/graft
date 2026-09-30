@@ -74,6 +74,7 @@ dependencies = [
  "bytes",
  "graft-core",
  "serde",
+ "serde_json",
  "thiserror",
 ]
 
