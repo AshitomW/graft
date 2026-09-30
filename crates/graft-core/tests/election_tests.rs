@@ -52,7 +52,7 @@ fn route_messages(cluster: &mut HashMap<u64, RaftEngine>) -> usize {
 fn test_pre_vote_and_leader_election() {
     let mut cluster = create_3_node_cluster();
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
 
@@ -69,7 +69,7 @@ fn test_pre_vote_and_leader_election() {
 fn test_log_proposal_and_replication() {
     let mut cluster = create_3_node_cluster();
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
     route_messages(&mut cluster);
@@ -95,7 +95,7 @@ fn test_log_proposal_and_replication() {
 fn test_check_quorum_stepdown() {
     let mut cluster = create_3_node_cluster();
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
     route_messages(&mut cluster);
@@ -115,7 +115,7 @@ fn test_check_quorum_stepdown() {
 fn test_leadership_transfer() {
     let mut cluster = create_3_node_cluster();
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
     route_messages(&mut cluster);
@@ -181,7 +181,7 @@ fn test_witness_acknowledges_without_storing_data() {
         cluster.insert(id, RaftEngine::new(config));
     }
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
     route_messages(&mut cluster);
@@ -224,7 +224,7 @@ fn test_flexible_quorum_replication() {
         cluster.insert(id, RaftEngine::new(config));
     }
 
-    for _ in 0..10 {
+    for _ in 0..15 {
         cluster.get_mut(&1).unwrap().tick();
     }
     route_messages(&mut cluster);

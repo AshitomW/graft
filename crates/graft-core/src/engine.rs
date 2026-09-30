@@ -48,7 +48,7 @@ impl RaftEngine {
     /// Creates a new Raft state machine engine.
     pub fn new(config: RaftConfig) -> Self {
         let is_learner = config.learners.contains(&config.id);
-        let election_timeout = config.election_tick;
+        let election_timeout = config.election_tick + (config.id * 2) % (config.election_tick.max(2));
 
         let mut engine = Self {
             config,
@@ -373,6 +373,8 @@ impl RaftEngine {
         self.leader_id = leader_id;
         self.election_elapsed = 0;
         self.heartbeat_elapsed = 0;
+        self.randomized_election_timeout =
+            self.config.election_tick + (self.config.id * 2) % (self.config.election_tick.max(2));
         self.lead_transferee = None;
         self.pre_votes.clear();
         self.votes.clear();

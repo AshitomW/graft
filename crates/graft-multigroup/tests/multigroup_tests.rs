@@ -47,7 +47,7 @@ fn test_coalesced_transport_batching() {
     router.add_group(2, create_engine(1), 50);
 
     let mut batches = Vec::new();
-    for _ in 0..11 {
+    for _ in 0..15 {
         batches.extend(router.tick());
     }
 
