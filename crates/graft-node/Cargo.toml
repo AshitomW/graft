@@ -1,0 +1,24 @@
+[package]
+name = "graft-node"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-core.workspace = true
+graft-health.workspace = true
+graft-storage.workspace = true
+graft-multigroup.workspace = true
+graft-reads.workspace = true
+graft-blob.workspace = true
+tokio.workspace = true
+bytes.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

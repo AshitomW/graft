@@ -1,0 +1,15 @@
+[package]
+name = "graft-storage"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-core.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+bytes.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

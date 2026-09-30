@@ -1,0 +1,13 @@
+[package]
+name = "graft-multigroup"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+graft-core.workspace = true
+graft-storage.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+bytes.workspace = true
