@@ -69,7 +69,7 @@ Graft uses two verification approaches:
 1. Deterministic Simulation (`graft-sim`):
    FoundationDB-style discrete-event simulation. Runs the exact state machine code against virtual clocks, simulated packet drops, reordering, network partitions, and disk crashes using seeded pseudo-random numbers. Any failure can be reproduced bit-for-bit by reusing the seed.
 
-2. Realistic Environment Tests (`graft-node`):
+2. Realistic  Tests (`graft-node`):
    Runs multi-node clusters over real OS loopback TCP sockets, writes to physical disk files with `fdatasync`, abruptly terminates nodes to verify crash recovery, and injects disk latency stalls to test live health-aware leadership transfer.
 
 ## Crate Layout
