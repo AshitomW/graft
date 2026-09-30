@@ -1,7 +1,6 @@
-//! Configuration options and validation for a Raft consensus node.
-
 use std::collections::HashSet;
 use thiserror::Error;
+use crate::quorum::{QuorumError, QuorumModel};
 use crate::types::NodeId;
 
 /// Configuration validation errors.
@@ -27,6 +26,12 @@ pub enum ConfigError {
     /// Duplicate peer identifier found.
     #[error("duplicate peer detected: {0}")]
     DuplicatePeer(NodeId),
+    /// Witness node is not present in peers set.
+    #[error("witness {0} not in peers list")]
+    WitnessNotInPeers(NodeId),
+    /// Quorum specification error.
+    #[error("quorum validation failed: {0}")]
+    Quorum(#[from] QuorumError),
 }
 
 /// Configuration settings for a Raft node instance.
@@ -38,6 +43,10 @@ pub struct RaftConfig {
     pub peers: Vec<NodeId>,
     /// Non-voting learner node identifiers.
     pub learners: Vec<NodeId>,
+    /// Witness node identifiers within the voting set.
+    pub witnesses: HashSet<NodeId>,
+    /// Quorum intersection model.
+    pub quorum_model: QuorumModel,
     /// Ticks before an election timeout fires.
     pub election_tick: u64,
     /// Ticks between leader heartbeat emissions.
@@ -74,6 +83,14 @@ impl RaftConfig {
         if !self.learners.contains(&self.id) && !seen.contains(&self.id) {
             return Err(ConfigError::MissingSelfInPeers(self.id));
         }
+
+        for &w in &self.witnesses {
+            if !seen.contains(&w) {
+                return Err(ConfigError::WitnessNotInPeers(w));
+            }
+        }
+
+        self.quorum_model.validate(&self.peers)?;
 
         Ok(())
     }

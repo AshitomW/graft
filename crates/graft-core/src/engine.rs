@@ -275,7 +275,7 @@ impl RaftEngine {
             .filter(|&id| id != self.config.id)
             .collect();
 
-        if self.pre_votes.len() > self.config.peers.len() / 2 {
+        if self.config.quorum_model.is_election_quorum(&self.pre_votes, &self.config.peers) {
             self.campaign_formal_vote();
             return;
         }
@@ -313,7 +313,7 @@ impl RaftEngine {
             .filter(|&id| id != self.config.id)
             .collect();
 
-        if self.votes.len() > self.config.peers.len() / 2 {
+        if self.config.quorum_model.is_election_quorum(&self.votes, &self.config.peers) {
             self.become_leader();
             return;
         }
@@ -401,7 +401,7 @@ impl RaftEngine {
     fn handle_pre_vote_response(&mut self, from: NodeId, granted: bool) {
         if granted {
             self.pre_votes.insert(from);
-            if self.pre_votes.len() > self.config.peers.len() / 2 {
+            if self.config.quorum_model.is_election_quorum(&self.pre_votes, &self.config.peers) {
                 self.campaign_formal_vote();
             }
         }
@@ -437,7 +437,7 @@ impl RaftEngine {
     fn handle_vote_response(&mut self, from: NodeId, granted: bool) {
         if granted {
             self.votes.insert(from);
-            if self.votes.len() > self.config.peers.len() / 2 {
+            if self.config.quorum_model.is_election_quorum(&self.votes, &self.config.peers) {
                 self.become_leader();
             }
         }
@@ -486,7 +486,13 @@ impl RaftEngine {
             }
         }
 
-        for entry in entries {
+        let is_witness = self.config.witnesses.contains(&self.config.id);
+
+        for mut entry in entries {
+            if is_witness && entry.entry_type == crate::types::EntryType::Normal {
+                entry.data.clear();
+            }
+
             if let Some(existing_term) = self.log.term_at(entry.index) {
                 if existing_term != entry.term {
                     self.log.truncate_after(entry.index - 1);
@@ -552,22 +558,21 @@ impl RaftEngine {
     }
 
     fn maybe_advance_commit_index(&mut self) {
-        let mut matches: Vec<Index> = self
-            .config
-            .peers
-            .iter()
-            .map(|&p| self.match_index.get(&p).copied().unwrap_or(0))
-            .collect();
-
-        matches.sort_unstable();
-        let median_idx = matches.len() / 2;
-        let quorum_match = matches[median_idx];
-
-        if quorum_match > self.commit_index {
-            if let Some(t) = self.log.term_at(quorum_match) {
+        let last_log_index = self.log.last_index();
+        for candidate_idx in ((self.commit_index + 1)..=last_log_index).rev() {
+            if let Some(t) = self.log.term_at(candidate_idx) {
                 if t == self.current_term {
-                    self.commit_index = quorum_match;
-                    self.bcast_append();
+                    let mut acks = HashSet::new();
+                    for &peer in &self.config.peers {
+                        if self.match_index.get(&peer).copied().unwrap_or(0) >= candidate_idx {
+                            acks.insert(peer);
+                        }
+                    }
+                    if self.config.quorum_model.is_write_quorum(&acks, &self.config.peers) {
+                        self.commit_index = candidate_idx;
+                        self.bcast_append();
+                        break;
+                    }
                 }
             }
         }
@@ -648,12 +653,8 @@ impl RaftEngine {
     }
 
     fn has_active_quorum(&self) -> bool {
-        let voting_active = self
-            .config
-            .peers
-            .iter()
-            .filter(|&id| self.active_peers.contains(id))
-            .count();
-        voting_active > self.config.peers.len() / 2
+        self.config
+            .quorum_model
+            .is_election_quorum(&self.active_peers, &self.config.peers)
     }
 }

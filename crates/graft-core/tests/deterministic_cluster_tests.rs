@@ -18,6 +18,8 @@ fn test_deterministic_chaos_cluster_election() {
             id,
             peers: node_ids.clone(),
             learners: Vec::new(),
+            witnesses: std::collections::HashSet::new(),
+            quorum_model: graft_core::QuorumModel::Majority,
             election_tick: 10,
             heartbeat_tick: 2,
             pre_vote_enabled: true,
